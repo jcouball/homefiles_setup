@@ -1,0 +1,94 @@
+#!/bin/bash
+set -e
+
+REPO_URL="$1"
+
+if [ -z "${REPO_URL}" ]; then
+  echo 'Usage:'
+  echo '  homefiles_setup REPO_URL'
+  echo
+  echo 'Example:'
+  echo '  homefiles_setup "https://github.com/jcouball/homefiles"'
+  echo
+  exit 1
+fi
+
+
+if [ -d "${HOME}/.homefiles" ]; then
+  echo ".homefiles directory already exists"
+  exit 1
+fi
+
+function init_script() {
+  cat <<'SCRIPT'
+# HOMEFILES START
+function homefiles {
+  git --git-dir="${HOME}/.homefiles/" --work-tree="${HOME}" "$@"
+}
+function homefiles_init {
+  git init --bare "${HOME}/.homefiles"
+}
+function homefiles_add_files {
+  for file in "$@"; do
+    HOME_FILE="${HOME}/${file}"
+    [ -f "${HOME_FILE}" ] && homefiles add "${HOME_FILE}")
+  done
+  echo "Done adding"
+}
+# HOMEFILES END
+SCRIPT
+}
+
+function update_init_files() {
+  local START="# HOMEFILES START"
+  local END="# HOMEFILES END"
+  for file in "$@"; do
+    HOME_FILE="${HOME}/${file}"
+    if [ -f "${HOME_FILE}" ]; then
+      if ! grep -q "^$START" "${HOME_FILE}"; then
+        init_script >> "${HOME_FILE}"
+      fi
+    fi
+  done
+}
+
+function remove_init_script() {
+  local START="# HOMEFILES START"
+  local END="# HOMEFILES END"
+  for file in "$@"; do
+    HOME_FILE="${HOME}/${file}"
+    if grep -q "^$END" "${HOME_FILE}"; then sed -i .bak "/^$START/,/^$END/d" "${HOME_FILE}"; fi
+  done
+}
+
+function source_init_script() {
+  local TMPFILE=$(mktemp)
+  init_script > "${TMPFILE}"
+  source "${TMPFILE}"
+  rm "${TMPFILE}"
+}
+
+function update_gitignore() {
+  local GIT_IGNORE_FILE="${HOME}/.gitignore"
+  if [ ! -f "${GIT_IGNORE_FILE}" ]; then echo ".homefiles" >> "${GIT_IGNORE_FILE}"; fi
+  if ! grep -q '^.homefiles$' "${GIT_IGNORE_FILE}"; then echo ".homefiles" >> "${GIT_IGNORE_FILE}"; fi
+}
+
+
+pushd ~
+
+update_init_files .bashrc .zshrc
+source_init_script
+
+homefiles_init
+homefiles config --local status.showUntrackedFiles no
+update_gitignore
+homefiles status
+
+echo "init"
+homefiles_add_files .gitignore README.md .bashrc .bash_profile .bash_login .profile .bash_logout .zshenv .zprofile .zshrc .zlogin .zlogout
+homefiles commit -m 'Initial commit'
+homefiles remote add origin "${REPO_URL}"
+homefiles push --set-upstream origin `homefiles branch --no-color --show-current`
+
+popd
