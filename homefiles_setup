@@ -8,7 +8,7 @@ if [ -z "${REPO_URL}" ]; then
   echo '  homefiles_setup REPO_URL'
   echo
   echo 'Example:'
-  echo '  homefiles_setup "https://github.com/jcouball/homefiles"'
+  echo '  homefiles_setup https://github.com/jcouball/homefiles.git'
   echo
   exit 1
 fi
@@ -19,7 +19,7 @@ if [ -d "${HOME}/.homefiles" ]; then
   exit 1
 fi
 
-function init_script() {
+function init_script {
   cat <<'SCRIPT'
 # HOMEFILES START
 function homefiles {
@@ -31,7 +31,7 @@ function homefiles_init {
 function homefiles_add_files {
   for file in "$@"; do
     HOME_FILE="${HOME}/${file}"
-    [ -f "${HOME_FILE}" ] && homefiles add "${HOME_FILE}")
+    [ -f "${HOME_FILE}" ] && homefiles add "${HOME_FILE}"
   done
   echo "Done adding"
 }
@@ -39,7 +39,7 @@ function homefiles_add_files {
 SCRIPT
 }
 
-function update_init_files() {
+function update_init_files {
   local START="# HOMEFILES START"
   local END="# HOMEFILES END"
   for file in "$@"; do
@@ -52,7 +52,7 @@ function update_init_files() {
   done
 }
 
-function remove_init_script() {
+function remove_init_script {
   local START="# HOMEFILES START"
   local END="# HOMEFILES END"
   for file in "$@"; do
@@ -61,19 +61,30 @@ function remove_init_script() {
   done
 }
 
-function source_init_script() {
+function source_init_script {
   local TMPFILE=$(mktemp)
   init_script > "${TMPFILE}"
   source "${TMPFILE}"
   rm "${TMPFILE}"
 }
 
-function update_gitignore() {
+function create_gitignore {
   local GIT_IGNORE_FILE="${HOME}/.gitignore"
   if [ ! -f "${GIT_IGNORE_FILE}" ]; then echo ".homefiles" >> "${GIT_IGNORE_FILE}"; fi
   if ! grep -q '^.homefiles$' "${GIT_IGNORE_FILE}"; then echo ".homefiles" >> "${GIT_IGNORE_FILE}"; fi
 }
 
+function create_readme {
+  local README_FILE="${HOME}/README.md"
+  if [ -f "${README_FILE}" ]; then return; fi
+  cat <<'README' > ${README_FILE}
+# My Home Files
+
+Use the `homefiles` command to manage files from this home directory in Git.
+
+See [homefiles_setup](https://github.com/jcouball/homefiles_setup) for details.
+README
+}
 
 pushd ~
 
@@ -82,10 +93,9 @@ source_init_script
 
 homefiles_init
 homefiles config --local status.showUntrackedFiles no
-update_gitignore
-homefiles status
+create_gitignore
+create_readme
 
-echo "init"
 homefiles_add_files .gitignore README.md .bashrc .bash_profile .bash_login .profile .bash_logout .zshenv .zprofile .zshrc .zlogin .zlogout
 homefiles commit -m 'Initial commit'
 homefiles remote add origin "${REPO_URL}"
