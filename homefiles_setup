@@ -1,15 +1,23 @@
 #!/bin/bash
 set -e
 
-REPO_URL="$1"
+COMMAND="$1"
+REPO_URL="$2"
+
+function usage {
+  echo 'Usage:'
+  echo '  homefiles_setup init REPO_URL'
+  echo '  homefiles_setup clone REPO_URL'
+  echo
+}
+
+if [[ "${COMMAND}" != "init" ]] && [[ "${COMMAND}" != "clone" ]]; then
+  usage
+  exit 1
+fi
 
 if [ -z "${REPO_URL}" ]; then
-  echo 'Usage:'
-  echo '  homefiles_setup REPO_URL'
-  echo
-  echo 'Example:'
-  echo '  homefiles_setup https://github.com/jcouball/homefiles.git'
-  echo
+  usage
   exit 1
 fi
 
@@ -27,6 +35,9 @@ function homefiles {
 }
 function homefiles_init {
   git init --bare "${HOME}/.homefiles"
+}
+function homefiles_clone {
+  git --git-dir="${HOME}/.homefiles/" --work-tree="${HOME}" clone "$1"
 }
 function homefiles_add_files {
   for file in "$@"; do
@@ -91,14 +102,22 @@ pushd ~
 update_init_files .bashrc .zshrc
 source_init_script
 
-homefiles_init
-homefiles config --local status.showUntrackedFiles no
-create_gitignore
-create_readme
+case "${COMMAND}" in
+  init)
+    homefiles_init
+    homefiles config --local status.showUntrackedFiles no
+    create_gitignore
+    create_readme
 
-homefiles_add_files .gitignore README.md .bashrc .bash_profile .bash_login .profile .bash_logout .zshenv .zprofile .zshrc .zlogin .zlogout
-homefiles commit -m 'Initial commit'
-homefiles remote add origin "${REPO_URL}"
-homefiles push --set-upstream origin `homefiles branch --no-color --show-current`
+    homefiles_add_files .gitignore README.md .bashrc .bash_profile .bash_login .profile .bash_logout .zshenv .zprofile .zshrc .zlogin .zlogout
+    homefiles commit -m 'Initial commit'
+    homefiles remote add origin "${REPO_URL}"
+    homefiles push --set-upstream origin `homefiles branch --no-color --show-current`
+    ;;
+  clone)
+    homefiles_clone "${REPO_URL}"
+    ;;
+esac
+
 
 popd
