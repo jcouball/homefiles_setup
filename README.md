@@ -4,14 +4,12 @@ Store files from your home directory in Git for backup and tracking.
 
 This is a good way to tracking changes to your shell startup files.
 
-Based on the article [The best way to store your dotfiles: A bare Git repository](https://developer.atlassian.com/blog/2016/02/best-way-to-store-dotfiles-git-bare-repo/).
-
 ## Usage
 
 ### Setup
 
 1. Clone this repository.
-2. Create an empty GitHub repository to store your homefiles. 
+2. Create an empty GitHub repository to store your homefiles.
 3. Run the `homefiles_setup` script
 
    ```shell script
@@ -30,7 +28,7 @@ Use the `homefiles` command to manage your home files. Since `homefiles` is an a
 
 Run `homefiles` from your home directory:
 
-* See what files have been changed:  
+* See what files have been changed:
 
    ```shell script
    homefiles status
@@ -42,7 +40,7 @@ Run `homefiles` from your home directory:
    homefiles status
    ```
 
-* Add a new file to Git: 
+* Add a new file to Git:
 
    ```shell script
    homefiles add .gemrc
@@ -55,7 +53,7 @@ Run `homefiles` from your home directory:
 ### Bash
 
 [Bash startup files](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html)
-showing the order (A, B, etc.) which files are sourced depending on how the shell was run. 
+showing the order (A, B, etc.) which files are sourced depending on how the shell was run.
 
 | File | Interactive<br/>Login | Interactive<br/>non-login | Script |
 | :-------------: | :---: | :---: | :---: |
@@ -86,7 +84,7 @@ On my system:
 ### Z Shell
 
 [Z Shell startup files](http://zsh.sourceforge.net/Intro/intro_3.html)
-showing the order (A, B, etc.) which files are sourced depending on how the shell was run. 
+showing the order (A, B, etc.) which files are sourced depending on how the shell was run.
 
 | File | Interactive<br/>Login | Interactive<br/>non-login | Script |
 | :-----------: | :---: | :---: | :---: |
@@ -113,3 +111,14 @@ ll /etc/zshenv ~/.zshenv /etc/zprofile ~/.zprofile /etc/zshrc ~/.zshrc /etc/zlog
 On my system:
 * `/etc/zshrc` sources `/etc/zshrc_$TERM_PROGRAM` — there isn’t one for iTerm.app
 * `~/.zshrc` sources `$ZSH/oh-my-zsh.sh`
+
+## Sources
+
+This method of using Git to manage home files was inspired from the following sources:
+
+* [The best way to store your dotfiles: A bare Git repository](https://developer.atlassian.com/blog/2016/02/best-way-to-store-dotfiles-git-bare-repo/)
+* [How to Manage your dotfiles using Git](https://pgaskin.net/posts/git-dotfiles/)
+* [Managing my dotfiles as a git repository](https://drewdevault.com/2019/12/30/dotfiles.html)
+* [Manage Dotfiles With a Bare Git Repository](https://harfangk.github.io/2016/09/18/manage-dotfiles-with-a-git-bare-repository.html)
+* [Managing Dotfiles with Git](https://www.edwardthomson.com/blog/managing_dotfiles_with_git.html)
+* [A Simple Approach to storing Home Directory Config Files (Dotfiles) in Git using Bash, Zsh, or Powershell, without a Bare Repo](https://dev.to/bowmanjd/store-home-directory-config-files-dotfiles-in-git-using-bash-zsh-or-powershell-a-simple-approach-without-a-bare-repo-2if7)
