@@ -26,7 +26,7 @@ function homefiles {
   git --git-dir="${HOME}/.homefiles/" --work-tree="${HOME}" "$@"
 }
 function homefiles_init {
-  git init --bare "${HOME}/.homefiles"
+  git init --bare "${HOME}/.homefiles" --initial-branch=main
   homefiles config --local status.showUntrackedFiles no
   # Exclude all files by default... use `homefiles add -f` to add a file
   echo '/**' > "${HOME}/.homefiles/info/exclude"
