@@ -27,11 +27,14 @@ function homefiles {
 }
 function homefiles_init {
   git init --bare "${HOME}/.homefiles"
+  homefiles config --local status.showUntrackedFiles no
+  # Exclude all files by default... use `homefiles add -f` to add a file
+  echo '/**' > "${HOME}/.homefiles/info/exclude"
 }
 function homefiles_add_files {
   for file in "$@"; do
     HOME_FILE="${HOME}/${file}"
-    [ -f "${HOME_FILE}" ] && homefiles add "${HOME_FILE}"
+    [ -f "${HOME_FILE}" ] && homefiles add --force "${HOME_FILE}"
   done
   echo "Done adding"
 }
@@ -92,8 +95,6 @@ update_init_files .bashrc .zshrc
 source_init_script
 
 homefiles_init
-homefiles config --local status.showUntrackedFiles no
-create_gitignore
 create_readme
 
 homefiles_add_files .gitignore README.md .bashrc .bash_profile .bash_login .profile .bash_logout .zshenv .zprofile .zshrc .zlogin .zlogout
